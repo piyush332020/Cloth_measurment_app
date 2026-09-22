@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import requests
-from flask import (Flask,render_template,request,jsonify,Response)
+from flask import (Flask, render_template, request, jsonify, Response)
 from dotenv import load_dotenv
 import cloth
 from services.product_service import search_products
@@ -96,11 +96,28 @@ def api_measure():
             "error": "Invalid image format"
         }), 400
 
-    frame = cv2.resize(frame, (320,240))
+    # Retain higher resolution (640x480) for accurate keypoint/pose detection
+    frame = cv2.resize(frame, (640, 480))
 
     try:
         result = cloth.measure_frame(frame)
-        return jsonify(result)
+
+        # Normalize and ensure essential keys exist for frontend app.js
+        if isinstance(result, dict):
+            result.setdefault("success", True)
+            result.setdefault("ready", False)
+            result.setdefault("status", "Detecting...")
+            result.setdefault("size", None)
+            result.setdefault("distance_cm", None)
+            return jsonify(result)
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Invalid measurement output",
+                "status": "Measurement error",
+                "ready": False
+            }), 500
+
     except Exception as e:
         print("Error during measurement:", e)
         return jsonify({
