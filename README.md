@@ -1,88 +1,73 @@
-# AI Cloth Size Measurement (Web App)
+👕 Cloth Size Measurement AI
 
-This is a modern Flask-based web application that estimates a user's clothing size using their webcam. It is a direct port of the original PyQt5 desktop application into a web environment, retaining the core OpenCV and MediaPipe measurement logic.
+✨ "Your Virtual Fitting Room – Powered by AI" ✨
 
-## Project Structure
+No more confusing trial rooms or hit-and-miss online orders! This app uses AI + Computer Vision to measure your body size through your webcam and suggests the perfect clothing fit in real time.
 
-```text
-cloth-size-app/
-│
-├── app.py                    # Flask application and routing
-├── cloth.py                  # Core MediaPipe/OpenCV measurement logic
-│
-├── services/
-│   ├── __init__.py
-│   └── product_service.py    # Mock e-commerce product recommendations
-│
-├── templates/
-│   └── index.html            # Main UI template (Virtual Fitting Room)
-│
-├── static/
-│   ├── css/
-│   │   └── style.css         # Modern, responsive UI styling
-│   └── js/
-│       └── app.js            # Webcam capture, API polling, and locking logic
-│
-├── data/
-│   └── categories.json       # Mapping of clothing categories to keywords
-│
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables
-└── README.md                 # This file
-```
+🌟 What makes it exciting?
 
-## Setup Instructions
+🎥 Real-time Body Tracking – Webcam + AI detect your posture, face, and shoulders instantly.
 
-1. **Install Python 3.9+** (if not already installed).
-2. **Create a virtual environment** (optional but recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use: venv\Scripts\activate
-   ```
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. **Configure Environment Variables**:
-   Edit the `.env` file and add your `SEARCH_API_KEY` when you are ready to integrate a real search API.
+🧮 Smart Auto-Calibration – Uses your face as a reference to calculate accurate distances.
 
-## How to Run
+📏 Virtual Tailor – Estimates your shoulder width, height ratio, and clothing size (S, M, L, XL, XXL).
 
-1. Start the Flask server:
-   ```bash
-   python app.py
-   ```
-2. Open your web browser and go to `http://localhost:5000`.
+🎨 Modern Interface – Clean, stylish PyQt5 UI with tabs, hover effects, and responsive design.
 
-## How It Works
+🛍️ Perfect for Shoppers – Helps you know your fit before you click Buy.
 
-### 1. Camera Measurement
-- The user's browser accesses the webcam via `navigator.mediaDevices.getUserMedia()`.
-- The live video is displayed on a `<video>` element.
-- A hidden `<canvas>` captures frames roughly every 300ms.
-- The frame is converted to a base64 JPEG and sent to the Flask backend (`POST /api/measure`).
-- `cloth.py` decodes the image, runs the existing MediaPipe Pose estimation, calibrates the focal length based on face width, and estimates distance and size.
-- The result is returned to the frontend.
+👉 It’s like having a personal stylist + tailor, right inside your laptop!
 
-### 2. The 3-Second Size Lock
-- The automatic lock logic is implemented in `static/js/app.js`.
-- It monitors the `ready` and `size` fields from the backend response.
-- If the distance is perfect and a size is detected, a 3-second timer starts.
-- If the size changes or the user moves out of the valid distance range, the timer resets.
-- If the same size holds steady for 3 consecutive seconds, the measurement locks automatically.
+⚡ Installation Guide
 
-### 3. Manual Capture
-- Once the user is at a "Perfect Distance" and a size is detected, the "Capture Size Now" button enables.
-- The user can click it to immediately lock the currently detected size, bypassing the 3-second timer.
+Follow these steps to run the project on your system:
 
-### 4. Product Recommendations
-- When a size is locked, the frontend sends the Category, Gender, and Locked Size to `POST /api/recommend`.
-- `services/product_service.py` intercepts this call. Currently, it generates formatted mock product data.
-- The frontend renders these products in a responsive grid.
+1. Clone or Download the Project
 
-## Limitations
+If you’re using Git:
 
-- **Performance Constraints:** Sending base64 images over HTTP 3-4 times a second can cause slight latency on slow networks or older laptops. 
-- **Mock Product Data:** The `product_service.py` currently returns mock data. To get real products, you will need to replace the mock generation block with an actual HTTP request to an API (like SerpAPI or Amazon API).
-- **Lighting and Backgrounds:** Since the backend relies on MediaPipe pose tracking without depth sensors, poor lighting or complex backgrounds may affect detection accuracy.
-- **Single Person:** The measurement assumes only one person is in the frame.
+git clone <your-repo-link>
+cd <project-folder>
+
+
+Or just copy the .py file into a folder.
+
+2. Install Python (if not already)
+
+Download from python.org
+
+Recommended: Python 3.8+
+
+3. Create a Virtual Environment (Optional but Recommended)
+python -m venv venv
+
+
+Activate it:
+
+Windows → venv\Scripts\activate
+
+Mac/Linux → source venv/bin/activate
+
+4. Install Required Libraries
+
+Run this command in your terminal:
+
+pip install opencv-python mediapipe PyQt5
+
+5. Run the App
+python your_file_name.py
+
+✅ You’re all set!
+
+Click Start → The webcam opens and begins detecting your body.
+
+Stand at the right distance → It auto-calibrates.
+
+Watch as your clothing size is estimated in real-time!
+
+
+
+
+MADE BY -PIYUSH SINGH 
+
+
