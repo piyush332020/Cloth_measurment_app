@@ -4,7 +4,13 @@ import math
 
 # Initialize mediapipe pose globally to avoid re-initializing for every frame
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+pose = mp_pose.Pose(
+    static_image_mode=False,
+    model_complexity=0,  # Light model to stop high CPU usage/timeouts
+    smooth_landmarks=True,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
 
 # Known constants from the original application
 KNOWN_FACE_WIDTH_CM = 16
@@ -14,6 +20,21 @@ focal_length = None
 def euclidean_dist(x1, y1, x2, y2):
     """Calculates the Euclidean distance between two points (x1, y1) and (x2, y2)."""
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
+def classify_size_by_shoulder_px(shoulder_width_px, frame_width):
+    """Fallback when full body height/ankles are off-screen."""
+    normalized_width = shoulder_width_px / frame_width
+    if normalized_width < 0.30:
+        return "S"
+    elif normalized_width < 0.38:
+        return "M"
+    elif normalized_width < 0.45:
+        return "L"
+    elif normalized_width < 0.52:
+        return "XL"
+    else:
+        return "XXL"
 
 def classify_size_by_ratio(ratio):
     """Classifies clothing size based on shoulder width / body height ratio."""
@@ -103,6 +124,9 @@ def measure_frame(frame):
                 if person_height_px > 0:
                     ratio = shoulder_width_px / person_height_px
                     size_text = classify_size_by_ratio(ratio)
+                else:
+                    # Use shoulder width fallback when upper body only is shown
+                    size_text = classify_size_by_shoulder_px(shoulder_width_px, w)
             elif distance_cm < 63:
                 status_text = "Move Back"
                 ready = False
