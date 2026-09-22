@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.6);
+            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.5);
 
             const response = await fetch("/api/measure", {
                 method: "POST",
