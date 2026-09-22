@@ -1,0 +1,23 @@
+{
+    "T-Shirt": ["t-shirt", "tee"],
+    "Shirt": ["shirt", "formal shirt", "casual shirt"],
+    "Polo Shirt": ["polo shirt", "polo"],
+    "Hoodie": ["hoodie"],
+    "Sweatshirt": ["sweatshirt"],
+    "Jacket": ["jacket"],
+    "Sweater": ["sweater"],
+    "Kurta": ["kurta"],
+    "Blazer": ["blazer"],
+    "Coat": ["coat"],
+    "Jeans": ["jeans"],
+    "Trousers": ["trousers"],
+    "Pants": ["pants"],
+    "Shorts": ["shorts"],
+    "Joggers": ["joggers"],
+    "Chinos": ["chinos"],
+    "Leggings": ["leggings"],
+    "Sportswear": ["sportswear"],
+    "Track Jacket": ["track jacket"],
+    "Ethnic Wear": ["ethnic wear"],
+    "Other": ["clothing"]
+}

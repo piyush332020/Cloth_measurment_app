@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cloth Size Measurement</title>
+    <meta name="description" content="Measure your clothing size using your camera">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <h1>AI Cloth Size Measurement</h1>
+            <p class="subtitle">Measure your clothing size using your camera</p>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <!-- STEP 1: CATEGORY SELECTION -->
+        <section id="category-section" class="card">
+            <h2>1. What are you shopping for?</h2>
+            <div class="form-group">
+                <label for="gender-select">Gender Preference</label>
+                <select id="gender-select">
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Unisex" selected>Unisex</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="category-select">Clothing Category</label>
+                <select id="category-select">
+                    <option value="T-Shirt">T-Shirt</option>
+                    <option value="Shirt">Shirt</option>
+                    <option value="Polo Shirt">Polo Shirt</option>
+                    <option value="Hoodie">Hoodie</option>
+                    <option value="Sweatshirt">Sweatshirt</option>
+                    <option value="Jacket">Jacket</option>
+                    <option value="Sweater">Sweater</option>
+                    <option value="Kurta">Kurta</option>
+                    <option value="Blazer">Blazer</option>
+                    <option value="Coat">Coat</option>
+                    <option value="Track Jacket">Track Jacket</option>
+                    <option value="Sportswear">Sportswear</option>
+                    <option value="Ethnic Wear">Ethnic Wear</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <button id="start-camera-btn" class="btn primary-btn">Start Camera to Measure</button>
+        </section>
+
+        <!-- STEP 2 & 3: CAMERA & MEASUREMENT -->
+        <section id="measurement-section" class="card hidden">
+            <div class="measurement-header">
+                <h2>Live Measurement</h2>
+                <button id="stop-camera-btn" class="btn danger-btn small">Stop</button>
+            </div>
+            
+            <div class="camera-container">
+                <video id="webcam" autoplay playsinline></video>
+                <!-- Hidden canvas for capturing frames -->
+                <canvas id="capture-canvas" style="display: none;"></canvas>
+                <!-- Overlay canvas for drawing (optional, if we want to draw bounding boxes on frontend) -->
+                <canvas id="overlay-canvas"></canvas>
+            </div>
+
+            <div class="status-panel">
+                <div class="status-indicator">
+                    <h3>Measurement Status</h3>
+                    <p id="status-text" class="status-badge">Starting...</p>
+                </div>
+                <div class="measurement-data">
+                    <p>Current Estimated Size: <strong id="live-size">-</strong></p>
+                    <p>Distance: <strong id="live-distance">-</strong></p>
+                </div>
+            </div>
+
+            <div class="lock-progress-container">
+                <p id="lock-timer-text">Hold steady to lock size...</p>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="manual-capture">
+                <p class="or-divider"><span>OR</span></p>
+                <button id="manual-capture-btn" class="btn secondary-btn" disabled>Capture Size Now</button>
+            </div>
+        </section>
+
+        <!-- STEP 7: LOCKED SIZE SCREEN -->
+        <section id="result-section" class="card hidden">
+            <div class="result-card">
+                <h2>YOUR MEASURED SIZE</h2>   
+                <div class="size-circle" id="locked-size-display">M</div>
+                
+                <div class="result-details">
+                    <p>Category: <strong id="locked-category-display">T-Shirt</strong></p>
+                    <p>Gender: <strong id="locked-gender-display">Unisex</strong></p>
+                    <p>Status: <span class="badge success">Locked</span></p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="measure-again-btn" class="btn outline-btn">Measure Again</button>
+                    <button id="change-category-btn" class="btn outline-btn">Change Category</button>
+                    <button id="find-clothes-btn" class="btn primary-btn">Find Clothes</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 8 & 9: RECOMMENDATIONS -->
+        <section id="recommendations-section" class="hidden">
+            <div class="recommendations-header">
+                <h2>Recommended For You</h2>
+                
+                <div class="size-filter">
+                    <label for="search-size-select">Explore other sizes:</label>
+                    <select id="search-size-select">
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                    </select>
+                </div>
+            </div>
+            
+            <p class="disclaimer-note">
+                <strong>Note:</strong> Size recommendations are estimates. Please check the retailer's size chart before purchasing.
+                Measured size: <strong id="reminder-measured-size">M</strong>
+            </p>
+
+            <div id="loading-recommendations" class="hidden loading-spinner">
+                <p>Searching for best products...</p>
+            </div>
+
+            <div id="product-grid" class="product-grid">
+                <!-- Product cards will be injected here via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 AI Cloth Size Measurement</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
