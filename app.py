@@ -223,9 +223,11 @@ def image_proxy():
 # =========================================================
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+
     app.run(
-        debug=True,
+        debug=False,
         host="0.0.0.0",
-        port=5002,
+        port=port,
         threaded=True
     )

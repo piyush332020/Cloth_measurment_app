@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 isMeasuring = true;
                 resetLockTimer();
 
-                measuringInterval = setInterval(processFrame, 700);
+                measuringInterval = setInterval(processFrame, 1500);
                 progressInterval = requestAnimationFrame(updateProgress);
             };
         } catch (error) {
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw new Error(`Recommendation HTTP error: ${response.status}`);
             }
-
+                
             const data = await response.json();
             loadingRecommendations.classList.add("hidden");
 
