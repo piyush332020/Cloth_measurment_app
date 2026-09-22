@@ -62,20 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
     initFromStorage();
 
     function initFromStorage() {
-        const savedCategory = localStorage.getItem("cloth_category");
-        if (savedCategory) {
-            categorySelect.value = savedCategory;
+        if (categorySelect) {
+            const savedCategory = localStorage.getItem("cloth_category");
+            if (savedCategory) categorySelect.value = savedCategory;
         }
 
-        const savedGender = localStorage.getItem("cloth_gender");
-        if (savedGender) {
-            genderSelect.value = savedGender;
+        if (genderSelect) {
+            const savedGender = localStorage.getItem("cloth_gender");
+            if (savedGender) genderSelect.value = savedGender;
         }
     }
 
     function saveToStorage() {
-        localStorage.setItem("cloth_category", categorySelect.value);
-        localStorage.setItem("cloth_gender", genderSelect.value);
+        if (categorySelect) localStorage.setItem("cloth_category", categorySelect.value);
+        if (genderSelect) localStorage.setItem("cloth_gender", genderSelect.value);
     }
 
 
@@ -83,55 +83,67 @@ document.addEventListener("DOMContentLoaded", () => {
     // EVENT LISTENERS
     // =========================================================
 
-    startCameraBtn.addEventListener("click", () => {
-        saveToStorage();
-        startCamera();
-    });
+    if (startCameraBtn) {
+        startCameraBtn.addEventListener("click", () => {
+            saveToStorage();
+            startCamera();
+        });
+    }
 
-    stopCameraBtn.addEventListener("click", stopCameraAndReset);
+    if (stopCameraBtn) stopCameraBtn.addEventListener("click", stopCameraAndReset);
 
-    manualCaptureBtn.addEventListener("click", () => {
-        if (currentStableSize && isMeasuring) {
-            lockSize(currentStableSize);
-        }
-    });
+    if (manualCaptureBtn) {
+        manualCaptureBtn.addEventListener("click", () => {
+            if (currentStableSize && isMeasuring) {
+                lockSize(currentStableSize);
+            }
+        });
+    }
 
-    measureAgainBtn.addEventListener("click", () => {
-        resultSection.classList.add("hidden");
-        recommendationsSection.classList.add("hidden");
-        startCamera();
-    });
+    if (measureAgainBtn) {
+        measureAgainBtn.addEventListener("click", () => {
+            resultSection.classList.add("hidden");
+            recommendationsSection.classList.add("hidden");
+            startCamera();
+        });
+    }
 
-    changeCategoryBtn.addEventListener("click", () => {
-        resultSection.classList.add("hidden");
-        recommendationsSection.classList.add("hidden");
-        categorySection.classList.remove("hidden");
-    });
+    if (changeCategoryBtn) {
+        changeCategoryBtn.addEventListener("click", () => {
+            resultSection.classList.add("hidden");
+            recommendationsSection.classList.add("hidden");
+            categorySection.classList.remove("hidden");
+        });
+    }
 
-    findClothesBtn.addEventListener("click", () => {
-        const size = lockedSizeDisplay.textContent.trim();
-        const category = categorySelect.value;
-        const gender = genderSelect.value;
+    if (findClothesBtn) {
+        findClothesBtn.addEventListener("click", () => {
+            const size = lockedSizeDisplay.textContent.trim();
+            const category = categorySelect.value;
+            const gender = genderSelect.value;
 
-        if (!size || size === "-") {
-            console.error("No valid locked size found.");
-            return;
-        }
+            if (!size || size === "-") {
+                console.error("No valid locked size found.");
+                return;
+            }
 
-        searchSizeSelect.value = size;
-        reminderMeasuredSize.textContent = size;
+            if (searchSizeSelect) searchSizeSelect.value = size;
+            if (reminderMeasuredSize) reminderMeasuredSize.textContent = size;
 
-        fetchRecommendations(category, size, gender);
-    });
+            fetchRecommendations(category, size, gender);
+        });
+    }
 
-    searchSizeSelect.addEventListener("change", (event) => {
-        const selectedSize = event.target.value;
-        fetchRecommendations(
-            categorySelect.value,
-            selectedSize,
-            genderSelect.value
-        );
-    });
+    if (searchSizeSelect) {
+        searchSizeSelect.addEventListener("change", (event) => {
+            const selectedSize = event.target.value;
+            fetchRecommendations(
+                categorySelect.value,
+                selectedSize,
+                genderSelect.value
+            );
+        });
+    }
 
 
     // =========================================================
@@ -139,13 +151,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     async function startCamera() {
-        categorySection.classList.add("hidden");
-        measurementSection.classList.remove("hidden");
+        if (categorySection) categorySection.classList.add("hidden");
+        if (measurementSection) measurementSection.classList.remove("hidden");
 
         isMeasuring = false;
         clearInterval(measuringInterval);
         cancelAnimationFrame(progressInterval);
         resetLockTimer();
+
+        // Initial UI resets
+        if (statusText) statusText.textContent = "Detecting...";
+        if (liveSize) liveSize.textContent = "-";
+        if (liveDistance) liveDistance.textContent = "-";
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({
@@ -156,20 +173,21 @@ document.addEventListener("DOMContentLoaded", () => {
             video.srcObject = stream;
 
             video.onloadedmetadata = () => {
+                video.play();
                 captureCanvas.width = video.videoWidth || 640;
                 captureCanvas.height = video.videoHeight || 480;
 
                 isMeasuring = true;
                 resetLockTimer();
 
-                measuringInterval = setInterval(processFrame, 1500);
+                measuringInterval = setInterval(processFrame, 1000);
                 progressInterval = requestAnimationFrame(updateProgress);
             };
         } catch (error) {
             console.error("Camera error:", error);
             alert("Could not access camera. Please allow camera permission.");
-            categorySection.classList.remove("hidden");
-            measurementSection.classList.add("hidden");
+            if (categorySection) categorySection.classList.remove("hidden");
+            if (measurementSection) measurementSection.classList.add("hidden");
         }
     }
 
@@ -184,8 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
             stream = null;
         }
 
-        measurementSection.classList.add("hidden");
-        categorySection.classList.remove("hidden");
+        if (measurementSection) measurementSection.classList.add("hidden");
+        if (categorySection) categorySection.classList.remove("hidden");
     }
 
 
@@ -201,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.5);
+            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.6);
 
             const response = await fetch("/api/measure", {
                 method: "POST",
@@ -218,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
             handleLockLogic(data);
         } catch (error) {
             console.error("Error sending frame:", error);
+            if (statusText) statusText.textContent = "Processing error";
         } finally {
             requestInProgress = false;
         }
@@ -232,28 +251,34 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!data) return;
 
         if (!data.success) {
-            statusText.textContent = data.status || "Measurement failed";
-            manualCaptureBtn.disabled = true;
+            if (statusText) statusText.textContent = data.status || "Measurement failed";
+            if (manualCaptureBtn) manualCaptureBtn.disabled = true;
             return;
         }
 
-        liveSize.textContent = data.size || "-";
-        liveDistance.textContent = (data.distance_cm !== null && data.distance_cm !== undefined) 
-            ? `${data.distance_cm} cm` 
-            : "-";
-
-        statusText.textContent = data.status || "Detecting...";
-        statusText.className = "status-badge";
-
-        if (data.status === "Perfect Distance") {
-            statusText.classList.add("perfect");
-        } else if (data.status && data.status.includes("Move")) {
-            statusText.classList.add("warning");
-        } else if (data.status === "Person not detected") {
-            statusText.classList.add("error");
+        if (liveSize) liveSize.textContent = data.size || "-";
+        if (liveDistance) {
+            liveDistance.textContent = (data.distance_cm !== null && data.distance_cm !== undefined) 
+                ? `${data.distance_cm} cm` 
+                : "-";
         }
 
-        manualCaptureBtn.disabled = !(data.ready && data.size);
+        if (statusText) {
+            statusText.textContent = data.status || "Detecting...";
+            statusText.className = "status-badge";
+
+            if (data.status === "Perfect Distance") {
+                statusText.classList.add("perfect");
+            } else if (data.status && data.status.includes("Move")) {
+                statusText.classList.add("warning");
+            } else if (data.status === "Person not detected") {
+                statusText.classList.add("error");
+            }
+        }
+
+        if (manualCaptureBtn) {
+            manualCaptureBtn.disabled = !(data.ready && data.size);
+        }
     }
 
 
@@ -287,8 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetLockTimer() {
         currentStableSize = null;
         stableStartTime = 0;
-        progressFill.style.width = "0%";
-        lockTimerText.textContent = "Hold steady to lock size...";
+        if (progressFill) progressFill.style.width = "0%";
+        if (lockTimerText) lockTimerText.textContent = "Hold steady to lock size...";
     }
 
     function updateProgress() {
@@ -299,11 +324,13 @@ document.addEventListener("DOMContentLoaded", () => {
             let percentage = (elapsed / LOCK_TIME_MS) * 100;
             if (percentage > 100) percentage = 100;
 
-            progressFill.style.width = `${percentage}%`;
-            lockTimerText.textContent = `Holding size ${currentStableSize}... ${(elapsed / 1000).toFixed(1)}s`;
+            if (progressFill) progressFill.style.width = `${percentage}%`;
+            if (lockTimerText) {
+                lockTimerText.textContent = `Holding size ${currentStableSize}... ${(elapsed / 1000).toFixed(1)}s`;
+            }
         } else {
-            progressFill.style.width = "0%";
-            lockTimerText.textContent = "Hold steady to lock size...";
+            if (progressFill) progressFill.style.width = "0%";
+            if (lockTimerText) lockTimerText.textContent = "Hold steady to lock size...";
         }
 
         if (isMeasuring) {
@@ -328,13 +355,13 @@ document.addEventListener("DOMContentLoaded", () => {
             stream = null;
         }
 
-        measurementSection.classList.add("hidden");
-        resultSection.classList.remove("hidden");
+        if (measurementSection) measurementSection.classList.add("hidden");
+        if (resultSection) resultSection.classList.remove("hidden");
 
-        lockedSizeDisplay.textContent = size;
-        lockedCategoryDisplay.textContent = categorySelect.value;
-        lockedGenderDisplay.textContent = genderSelect.value;
-        reminderMeasuredSize.textContent = size;
+        if (lockedSizeDisplay) lockedSizeDisplay.textContent = size;
+        if (lockedCategoryDisplay) lockedCategoryDisplay.textContent = categorySelect ? categorySelect.value : "";
+        if (lockedGenderDisplay) lockedGenderDisplay.textContent = genderSelect ? genderSelect.value : "";
+        if (reminderMeasuredSize) reminderMeasuredSize.textContent = size;
     }
 
 
@@ -343,10 +370,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     async function fetchRecommendations(category, size, gender) {
-        recommendationsSection.classList.remove("hidden");
-        productGrid.innerHTML = "";
-        loadingRecommendations.classList.remove("hidden");
-        recommendationsSection.scrollIntoView({ behavior: "smooth" });
+        if (recommendationsSection) recommendationsSection.classList.remove("hidden");
+        if (productGrid) productGrid.innerHTML = "";
+        if (loadingRecommendations) loadingRecommendations.classList.remove("hidden");
+        if (recommendationsSection) recommendationsSection.scrollIntoView({ behavior: "smooth" });
 
         try {
             const response = await fetch("/api/recommend", {
@@ -360,11 +387,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
                 
             const data = await response.json();
-            loadingRecommendations.classList.add("hidden");
+            if (loadingRecommendations) loadingRecommendations.classList.add("hidden");
 
             if (data.success && Array.isArray(data.products) && data.products.length > 0) {
                 renderProducts(data.products);
-            } else {
+            } else if (productGrid) {
                 productGrid.innerHTML = `
                     <div class="no-products">
                         <h3>No products found</h3>
@@ -374,13 +401,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (error) {
             console.error("Recommendation error:", error);
-            loadingRecommendations.classList.add("hidden");
-            productGrid.innerHTML = `
-                <div class="no-products">
-                    <h3>Unable to load products</h3>
-                    <p>Please try again in a few seconds.</p>
-                </div>
-            `;
+            if (loadingRecommendations) loadingRecommendations.classList.add("hidden");
+            if (productGrid) {
+                productGrid.innerHTML = `
+                    <div class="no-products">
+                        <h3>Unable to load products</h3>
+                        <p>Please try again in a few seconds.</p>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -390,9 +419,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     function renderProducts(products) {
+        if (!productGrid) return;
         productGrid.innerHTML = "";
 
-        // Safe SVG placeholder string for fallback
         const svgPlaceholder = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
             <svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">
                 <rect width="100%" height="100%" fill="#eeeeee"/>
