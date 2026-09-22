@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import cloth
 from services.product_service import search_products
 import services.product_service as ps
-import time
+
 
 # =========================================================
 # PROJECT PATH
@@ -79,13 +79,6 @@ def index():
 
 @app.route("/api/measure", methods=["POST"])
 def api_measure():
-    print("BEFORE MEDIAPIPE")
-    start = time.time()
-
-    result = cloth.measure_frame(frame)
-
-    print("AFTER MEDIAPIPE")
-    print("MediaPipe time:", round(time.time() - start, 2), "seconds")
     data = request.json
 
     if not data or "image" not in data:
@@ -106,14 +99,7 @@ def api_measure():
     frame = cv2.resize(frame, (320,240))
 
     try:
-        print("BEFORE MEDIAPIPE")
-        start = time.time()
-
         result = cloth.measure_frame(frame)
-
-        print("AFTER MEDIAPIPE")
-        print("MediaPipe time:", round(time.time() - start, 2), "seconds")
-
         return jsonify(result)
     except Exception as e:
         print("Error during measurement:", e)
