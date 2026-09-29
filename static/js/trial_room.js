@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeTrialBtn =
         document.getElementById("close-trial-btn");
 
+    const trialRoomBtn =
+        document.getElementById("trial-room-btn");
+
 
     // =========================================================
     // STATE
@@ -53,6 +56,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!trialRoomSection) {
         return;
+    }
+
+
+    // =========================================================
+    // TRIAL ROOM BUTTON FROM MEASURED SIZE SCREEN
+    // =========================================================
+
+    if (trialRoomBtn) {
+
+        trialRoomBtn.addEventListener("click", async () => {
+
+            currentCategory =
+                document.getElementById("category-select")?.value ||
+                "T-Shirt";
+
+            currentProductTitle = "";
+            selectedGarmentBlob = null;
+            selectedGarmentName = "";
+
+            garmentPreview.src = "";
+            garmentPreview.classList.add("hidden");
+            applyGarmentBtn.disabled = true;
+
+            // Stop an existing product trial before starting a blank trial room.
+            stopTrialRoom();
+
+            openTrialRoom();
+            setStatus("Starting AI trial room...", "loading");
+
+            try {
+                await startTrialRoom();
+            } catch (error) {
+                console.error("Trial room error:", error);
+                setStatus(
+                    error.message || "Could not start the trial room.",
+                    "error"
+                );
+            }
+        });
     }
 
 

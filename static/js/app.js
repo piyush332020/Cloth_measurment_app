@@ -18,8 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const measureAgainBtn = document.getElementById("measure-again-btn");
     const changeCategoryBtn = document.getElementById("change-category-btn");
     const findClothesBtn = document.getElementById("find-clothes-btn");
-    const trialRoomBtn = document.getElementById("trial-room-btn");
-    const trialRoomSection = document.getElementById("trial-room-section");
 
     const video = document.getElementById("webcam");
     const captureCanvas = document.getElementById("capture-canvas");
@@ -41,7 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadingRecommendations = document.getElementById("loading-recommendations");
     const productGrid = document.getElementById("product-grid");
 
-
     // =========================================================
     // STATE VARIABLES
     // =========================================================
@@ -55,29 +52,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentStableSize = null;
     let stableStartTime = 0;
     const LOCK_TIME_MS = 3000;
-
-
-    // =========================================================
+// =========================================================
     // LOCAL STORAGE
     // =========================================================
 
     initFromStorage();
 
     function initFromStorage() {
-        if (categorySelect) {
-            const savedCategory = localStorage.getItem("cloth_category");
-            if (savedCategory) categorySelect.value = savedCategory;
+        const savedCategory = localStorage.getItem("cloth_category");
+        if (savedCategory) {
+            categorySelect.value = savedCategory;
         }
 
-        if (genderSelect) {
-            const savedGender = localStorage.getItem("cloth_gender");
-            if (savedGender) genderSelect.value = savedGender;
+        const savedGender = localStorage.getItem("cloth_gender");
+        if (savedGender) {
+            genderSelect.value = savedGender;
         }
     }
 
     function saveToStorage() {
-        if (categorySelect) localStorage.setItem("cloth_category", categorySelect.value);
-        if (genderSelect) localStorage.setItem("cloth_gender", genderSelect.value);
+        localStorage.setItem("cloth_category", categorySelect.value);
+        localStorage.setItem("cloth_gender", genderSelect.value);
     }
 
 
@@ -85,58 +80,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // EVENT LISTENERS
     // =========================================================
 
-    if (startCameraBtn) {
-        startCameraBtn.addEventListener("click", () => {
-            saveToStorage();
-            startCamera();
-        });
-    }
+    startCameraBtn.addEventListener("click", () => {
+        saveToStorage();
+        startCamera();
+    });
 
-    if (stopCameraBtn) stopCameraBtn.addEventListener("click", stopCameraAndReset);
+    stopCameraBtn.addEventListener("click", stopCameraAndReset);
 
-    if (manualCaptureBtn) {
-        manualCaptureBtn.addEventListener("click", () => {
-            if (currentStableSize && isMeasuring) {
-                lockSize(currentStableSize);
-            }
-        });
-    }
+    manualCaptureBtn.addEventListener("click", () => {
+        if (currentStableSize && isMeasuring) {
+            lockSize(currentStableSize);
+        }
+    });
 
-    if (measureAgainBtn) {
-        measureAgainBtn.addEventListener("click", () => {
-            resultSection.classList.add("hidden");
-            recommendationsSection.classList.add("hidden");
-            startCamera();
-        });
-    }
+    measureAgainBtn.addEventListener("click", () => {
+        resultSection.classList.add("hidden");
+        recommendationsSection.classList.add("hidden");
+        startCamera();
+    });
 
-    if (changeCategoryBtn) {
-        changeCategoryBtn.addEventListener("click", () => {
-            resultSection.classList.add("hidden");
-            recommendationsSection.classList.add("hidden");
-            categorySection.classList.remove("hidden");
-        });
-    }
+    changeCategoryBtn.addEventListener("click", () => {
+        resultSection.classList.add("hidden");
+        recommendationsSection.classList.add("hidden");
+        categorySection.classList.remove("hidden");
+    });
 
-    if (findClothesBtn) {
-        findClothesBtn.addEventListener("click", () => {
-            const size = lockedSizeDisplay.textContent.trim();
-            const category = categorySelect.value;
-            const gender = genderSelect.value;
+    findClothesBtn.addEventListener("click", () => {
+        const size = lockedSizeDisplay.textContent.trim();
+        const category = categorySelect.value;
+        const gender = genderSelect.value;
 
-            if (!size || size === "-") {
-                console.error("No valid locked size found.");
-                return;
-            }
+        if (!size || size === "-") {
+            console.error("No valid locked size found.");
+            return;
+        }
 
-            if (searchSizeSelect) searchSizeSelect.value = size;
-            if (reminderMeasuredSize) reminderMeasuredSize.textContent = size;
+        searchSizeSelect.value = size;
+        reminderMeasuredSize.textContent = size;
 
-            fetchRecommendations(category, size, gender);
-        });
-    }
+        fetchRecommendations(category, size, gender);
+    });
 
-<<<<<<< HEAD
     searchSizeSelect.addEventListener("change", (event) => {
         const selectedSize = event.target.value;
         fetchRecommendations(
@@ -145,29 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
             genderSelect.value
         );
     });
-    
-    trialRoomBtn.addEventListener("click", () => {
-
-    trialRoomSection.classList.remove("hidden");
-
-    trialRoomSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-
-});
-=======
-    if (searchSizeSelect) {
-        searchSizeSelect.addEventListener("change", (event) => {
-            const selectedSize = event.target.value;
-            fetchRecommendations(
-                categorySelect.value,
-                selectedSize,
-                genderSelect.value
-            );
-        });
-    }
->>>>>>> 9df5273ac2d1ebbeb6d49a4acbbb9677087e4e7a
 
 
     // =========================================================
@@ -175,18 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     async function startCamera() {
-        if (categorySection) categorySection.classList.add("hidden");
-        if (measurementSection) measurementSection.classList.remove("hidden");
+        categorySection.classList.add("hidden");
+        measurementSection.classList.remove("hidden");
 
         isMeasuring = false;
         clearInterval(measuringInterval);
         cancelAnimationFrame(progressInterval);
         resetLockTimer();
-
-        // Initial UI resets
-        if (statusText) statusText.textContent = "Detecting...";
-        if (liveSize) liveSize.textContent = "-";
-        if (liveDistance) liveDistance.textContent = "-";
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({
@@ -197,21 +153,20 @@ document.addEventListener("DOMContentLoaded", () => {
             video.srcObject = stream;
 
             video.onloadedmetadata = () => {
-                video.play();
                 captureCanvas.width = video.videoWidth || 640;
                 captureCanvas.height = video.videoHeight || 480;
 
                 isMeasuring = true;
                 resetLockTimer();
 
-                measuringInterval = setInterval(processFrame, 1000);
+                measuringInterval = setInterval(processFrame, 1500);
                 progressInterval = requestAnimationFrame(updateProgress);
             };
         } catch (error) {
             console.error("Camera error:", error);
             alert("Could not access camera. Please allow camera permission.");
-            if (categorySection) categorySection.classList.remove("hidden");
-            if (measurementSection) measurementSection.classList.add("hidden");
+            categorySection.classList.remove("hidden");
+            measurementSection.classList.add("hidden");
         }
     }
 
@@ -226,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
             stream = null;
         }
 
-        if (measurementSection) measurementSection.classList.add("hidden");
-        if (categorySection) categorySection.classList.remove("hidden");
+        measurementSection.classList.add("hidden");
+        categorySection.classList.remove("hidden");
     }
 
 
@@ -243,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.6);
+            const dataURL = captureCanvas.toDataURL("image/jpeg", 0.5);
 
             const response = await fetch("/api/measure", {
                 method: "POST",
@@ -260,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
             handleLockLogic(data);
         } catch (error) {
             console.error("Error sending frame:", error);
-            if (statusText) statusText.textContent = "Processing error";
         } finally {
             requestInProgress = false;
         }
@@ -275,34 +229,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!data) return;
 
         if (!data.success) {
-            if (statusText) statusText.textContent = data.status || "Measurement failed";
-            if (manualCaptureBtn) manualCaptureBtn.disabled = true;
+            statusText.textContent = data.status || "Measurement failed";
+            manualCaptureBtn.disabled = true;
             return;
         }
 
-        if (liveSize) liveSize.textContent = data.size || "-";
-        if (liveDistance) {
-            liveDistance.textContent = (data.distance_cm !== null && data.distance_cm !== undefined) 
-                ? `${data.distance_cm} cm` 
-                : "-";
+        liveSize.textContent = data.size || "-";
+        liveDistance.textContent = (data.distance_cm !== null && data.distance_cm !== undefined) 
+            ? `${data.distance_cm} cm` 
+            : "-";
+
+        statusText.textContent = data.status || "Detecting...";
+        statusText.className = "status-badge";
+
+        if (data.status === "Perfect Distance") {
+            statusText.classList.add("perfect");
+        } else if (data.status && data.status.includes("Move")) {
+            statusText.classList.add("warning");
+        } else if (data.status === "Person not detected") {
+            statusText.classList.add("error");
         }
 
-        if (statusText) {
-            statusText.textContent = data.status || "Detecting...";
-            statusText.className = "status-badge";
-
-            if (data.status === "Perfect Distance") {
-                statusText.classList.add("perfect");
-            } else if (data.status && data.status.includes("Move")) {
-                statusText.classList.add("warning");
-            } else if (data.status === "Person not detected") {
-                statusText.classList.add("error");
-            }
-        }
-
-        if (manualCaptureBtn) {
-            manualCaptureBtn.disabled = !(data.ready && data.size);
-        }
+        manualCaptureBtn.disabled = !(data.ready && data.size);
     }
 
 
@@ -336,8 +284,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetLockTimer() {
         currentStableSize = null;
         stableStartTime = 0;
-        if (progressFill) progressFill.style.width = "0%";
-        if (lockTimerText) lockTimerText.textContent = "Hold steady to lock size...";
+        progressFill.style.width = "0%";
+        lockTimerText.textContent = "Hold steady to lock size...";
     }
 
     function updateProgress() {
@@ -348,13 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
             let percentage = (elapsed / LOCK_TIME_MS) * 100;
             if (percentage > 100) percentage = 100;
 
-            if (progressFill) progressFill.style.width = `${percentage}%`;
-            if (lockTimerText) {
-                lockTimerText.textContent = `Holding size ${currentStableSize}... ${(elapsed / 1000).toFixed(1)}s`;
-            }
+            progressFill.style.width = `${percentage}%`;
+            lockTimerText.textContent = `Holding size ${currentStableSize}... ${(elapsed / 1000).toFixed(1)}s`;
         } else {
-            if (progressFill) progressFill.style.width = "0%";
-            if (lockTimerText) lockTimerText.textContent = "Hold steady to lock size...";
+            progressFill.style.width = "0%";
+            lockTimerText.textContent = "Hold steady to lock size...";
         }
 
         if (isMeasuring) {
@@ -379,13 +325,13 @@ document.addEventListener("DOMContentLoaded", () => {
             stream = null;
         }
 
-        if (measurementSection) measurementSection.classList.add("hidden");
-        if (resultSection) resultSection.classList.remove("hidden");
+        measurementSection.classList.add("hidden");
+        resultSection.classList.remove("hidden");
 
-        if (lockedSizeDisplay) lockedSizeDisplay.textContent = size;
-        if (lockedCategoryDisplay) lockedCategoryDisplay.textContent = categorySelect ? categorySelect.value : "";
-        if (lockedGenderDisplay) lockedGenderDisplay.textContent = genderSelect ? genderSelect.value : "";
-        if (reminderMeasuredSize) reminderMeasuredSize.textContent = size;
+        lockedSizeDisplay.textContent = size;
+        lockedCategoryDisplay.textContent = categorySelect.value;
+        lockedGenderDisplay.textContent = genderSelect.value;
+        reminderMeasuredSize.textContent = size;
     }
 
 
@@ -394,10 +340,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     async function fetchRecommendations(category, size, gender) {
-        if (recommendationsSection) recommendationsSection.classList.remove("hidden");
-        if (productGrid) productGrid.innerHTML = "";
-        if (loadingRecommendations) loadingRecommendations.classList.remove("hidden");
-        if (recommendationsSection) recommendationsSection.scrollIntoView({ behavior: "smooth" });
+        recommendationsSection.classList.remove("hidden");
+        productGrid.innerHTML = "";
+        loadingRecommendations.classList.remove("hidden");
+        recommendationsSection.scrollIntoView({ behavior: "smooth" });
 
         try {
             const response = await fetch("/api/recommend", {
@@ -411,11 +357,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
                 
             const data = await response.json();
-            if (loadingRecommendations) loadingRecommendations.classList.add("hidden");
+            loadingRecommendations.classList.add("hidden");
 
             if (data.success && Array.isArray(data.products) && data.products.length > 0) {
                 renderProducts(data.products);
-            } else if (productGrid) {
+            } else {
                 productGrid.innerHTML = `
                     <div class="no-products">
                         <h3>No products found</h3>
@@ -425,15 +371,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (error) {
             console.error("Recommendation error:", error);
-            if (loadingRecommendations) loadingRecommendations.classList.add("hidden");
-            if (productGrid) {
-                productGrid.innerHTML = `
-                    <div class="no-products">
-                        <h3>Unable to load products</h3>
-                        <p>Please try again in a few seconds.</p>
-                    </div>
-                `;
-            }
+            loadingRecommendations.classList.add("hidden");
+            productGrid.innerHTML = `
+                <div class="no-products">
+                    <h3>Unable to load products</h3>
+                    <p>Please try again in a few seconds.</p>
+                </div>
+            `;
         }
     }
 
@@ -443,9 +387,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
 
     function renderProducts(products) {
-        if (!productGrid) return;
         productGrid.innerHTML = "";
 
+        // Safe SVG placeholder string for fallback
         const svgPlaceholder = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
             <svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">
                 <rect width="100%" height="100%" fill="#eeeeee"/>
@@ -493,8 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             type="button"
                             class="btn primary-btn try-on-btn"
                             data-image="${encodeURIComponent(imageUrl)}"
-                            data-title="${encodeURIComponent(product.title || "Selected clothing")}" 
-                            data-category="${encodeURIComponent(product.category || categorySelect.value)}"
+                            data-title="${encodeURIComponent(product.title || "Selected clothing")}"
+                            data-category="${encodeURIComponent(product.category || categorySelect.value || "T-Shirt")}"
                         >
                             Try It On
                         </button>
@@ -507,8 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             productGrid.appendChild(card);
         });
-
-
     }
 
 });
