@@ -149,7 +149,7 @@ def search_products(
 
         products = []
 
-        for item in shopping_results[:8]:
+        for item in shopping_results[:39]:
             original_image = extract_thumbnail_url(item)
 
             if original_image:

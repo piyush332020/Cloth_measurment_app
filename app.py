@@ -4,12 +4,12 @@ from pathlib import Path
 import cv2
 import numpy as np
 import requests
-from flask import (Flask,render_template,request,jsonify,Response)
+from flask import (Flask, render_template, request, jsonify, Response)
 from dotenv import load_dotenv
 import cloth
 from services.product_service import search_products
 import services.product_service as ps
-
+from services.decart_service import create_client_token
 
 # =========================================================
 # PROJECT PATH
@@ -28,6 +28,7 @@ load_dotenv(ENV_FILE)
 print("ENV FILE:", ENV_FILE)
 print("ENV EXISTS:", ENV_FILE.exists())
 print("API key loaded:", bool(os.getenv("SEARCH_API_KEY")))
+print("Decart key loaded:", bool(os.getenv("DECART_API_KEY")))
 
 
 # =========================================================
@@ -96,11 +97,28 @@ def api_measure():
             "error": "Invalid image format"
         }), 400
 
-    frame = cv2.resize(frame, (320,240))
+    # Retain higher resolution (640x480) for accurate keypoint/pose detection
+    frame = cv2.resize(frame, (640, 480))
 
     try:
         result = cloth.measure_frame(frame)
-        return jsonify(result)
+
+        # Normalize and ensure essential keys exist for frontend app.js
+        if isinstance(result, dict):
+            result.setdefault("success", True)
+            result.setdefault("ready", False)
+            result.setdefault("status", "Detecting...")
+            result.setdefault("size", None)
+            result.setdefault("distance_cm", None)
+            return jsonify(result)
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Invalid measurement output",
+                "status": "Measurement error",
+                "ready": False
+            }), 500
+
     except Exception as e:
         print("Error during measurement:", e)
         return jsonify({
@@ -216,6 +234,28 @@ def image_proxy():
     except Exception as e:
         print("IMAGE ERROR:", e)
         return "Image unavailable", 500
+# =========================================================
+# DECART CLIENT TOKEN API
+# =========================================================
+
+@app.route("/api/decart/token", methods=["POST"])
+def api_decart_token():
+    try:
+        token = create_client_token()
+
+        return jsonify({
+            "success": True,
+            "apiKey": token["apiKey"],
+            "expiresAt": token["expiresAt"]
+        })
+
+    except Exception as e:
+        print("Decart token error:", e)
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 # =========================================================
@@ -223,7 +263,7 @@ def image_proxy():
 # =========================================================
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get("PORT", 1011))
 
     app.run(
         debug=False,

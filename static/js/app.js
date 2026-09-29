@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const measureAgainBtn = document.getElementById("measure-again-btn");
     const changeCategoryBtn = document.getElementById("change-category-btn");
     const findClothesBtn = document.getElementById("find-clothes-btn");
+    const trialRoomBtn = document.getElementById("trial-room-btn");
+    const trialRoomSection = document.getElementById("trial-room-section");
 
     const video = document.getElementById("webcam");
     const captureCanvas = document.getElementById("capture-canvas");
@@ -132,6 +134,17 @@ document.addEventListener("DOMContentLoaded", () => {
             genderSelect.value
         );
     });
+    
+    trialRoomBtn.addEventListener("click", () => {
+
+    trialRoomSection.classList.remove("hidden");
+
+    trialRoomSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+});
 
 
     // =========================================================
@@ -435,14 +448,27 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="rec-size">${sizeText}</span>
                         <span>Category: ${product.category || ""}</span>
                     </div>
-                    <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="btn primary-btn">
-                        View on ${website}
-                    </a>
+                    <div class="product-card-actions">
+                        <button
+                            type="button"
+                            class="btn primary-btn try-on-btn"
+                            data-image="${encodeURIComponent(imageUrl)}"
+                            data-title="${encodeURIComponent(product.title || "Selected clothing")}" 
+                            data-category="${encodeURIComponent(product.category || categorySelect.value)}"
+                        >
+                            Try It On
+                        </button>
+                        <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="btn outline-btn">
+                            View on ${website}
+                        </a>
+                    </div>
                 </div>
             `;
 
             productGrid.appendChild(card);
         });
+
+
     }
 
 });

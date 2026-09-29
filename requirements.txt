@@ -5,3 +5,4 @@ numpy==1.26.4
 python-dotenv==1.0.1
 requests
 gunicorn
+decart==0.2.1

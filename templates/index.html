@@ -109,6 +109,87 @@
                     <button id="measure-again-btn" class="btn outline-btn">Measure Again</button>
                     <button id="change-category-btn" class="btn outline-btn">Change Category</button>
                     <button id="find-clothes-btn" class="btn primary-btn">Find Clothes</button>
+                    <button id="trial-room-btn" class="btn outline-btn">Trial Room</button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- STEP 7.5: AI VIRTUAL TRIAL ROOM -->
+        <section id="trial-room-section" class="card hidden">
+
+            <div class="trial-room-header">
+                <div>
+                    <h2>AI Virtual Trial Room</h2>
+                    <p>
+                        See the selected or uploaded garment
+                        on you in real time.
+                    </p>
+                </div>
+
+                <button
+                    id="close-trial-btn"
+                    class="btn outline-btn small">
+                    Close
+                </button>
+            </div>
+
+            <div class="trial-room-layout">
+
+                <div class="trial-video-panel">
+                    <div class="trial-video-container">
+                        <video
+                            id="trial-output"
+                            autoplay
+                            playsinline>
+                        </video>
+
+                        <div
+                            id="trial-status"
+                            class="trial-status idle">
+                            Trial room is ready.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trial-controls">
+                    <h3>Garment</h3>
+
+                    <label
+                        for="garment-upload"
+                        class="upload-label">
+                        Upload your clothing photo
+                    </label>
+
+                    <input
+                        id="garment-upload"
+                        type="file"
+                        accept="image/*">
+
+                    <img
+                        id="garment-preview"
+                        class="garment-preview hidden"
+                        alt="Selected garment preview">
+
+                    <button
+                        id="apply-garment-btn"
+                        class="btn primary-btn"
+                        disabled>
+                        Apply Garment
+                    </button>
+
+                    <button
+                        id="stop-trial-btn"
+                        class="btn danger-btn"
+                        disabled>
+                        Stop Trial Room
+                    </button>
+
+                    <p class="trial-help">
+                        For better results, upload a clear
+                        photo of the garment without a person
+                        wearing it.
+                    </p>
                 </div>
             </div>
         </section>
@@ -143,13 +224,13 @@
                 <!-- Product cards will be injected here via JS -->
             </div>
         </section>
-
-    </main>
+</main>
 
     <footer>
         <p>&copy; 2026 AI Cloth Size Measurement</p>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/trial_room.js') }}"></script>
 </body>
 </html>
