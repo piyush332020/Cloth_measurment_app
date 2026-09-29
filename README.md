@@ -36,6 +36,8 @@ Instead of simply asking “What size should I buy?”, this project creates an 
        🤖 Lucy VTON AI
               ↓
       👤 Virtual Try-On
+
+      
 🛠️ Tech Stack
 Technology	Purpose
 🐍 Python	Core application & AI processing
