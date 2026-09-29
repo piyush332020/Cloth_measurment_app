@@ -65,37 +65,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (trialRoomBtn) {
 
-        trialRoomBtn.addEventListener("click", async () => {
+    trialRoomBtn.addEventListener("click", () => {
 
-            currentCategory =
-                document.getElementById("category-select")?.value ||
-                "T-Shirt";
+        currentCategory =
+            document.getElementById("category-select")?.value ||
+            "T-Shirt";
 
-            currentProductTitle = "";
-            selectedGarmentBlob = null;
-            selectedGarmentName = "";
+        currentProductTitle = "";
+        selectedGarmentBlob = null;
+        selectedGarmentName = "";
 
-            garmentPreview.src = "";
-            garmentPreview.classList.add("hidden");
-            applyGarmentBtn.disabled = true;
+        garmentPreview.src = "";
+        garmentPreview.classList.add("hidden");
 
-            // Stop an existing product trial before starting a blank trial room.
-            stopTrialRoom();
+        // Do NOT start Decart yet.
+        applyGarmentBtn.disabled = true;
 
-            openTrialRoom();
-            setStatus("Starting AI trial room...", "loading");
+        stopTrialRoom();
 
-            try {
-                await startTrialRoom();
-            } catch (error) {
-                console.error("Trial room error:", error);
-                setStatus(
-                    error.message || "Could not start the trial room.",
-                    "error"
-                );
-            }
-        });
-    }
+        openTrialRoom();
+
+        setStatus(
+            "Select a garment, then click Apply Garment.",
+            "idle"
+        );
+    });
+}
 
 
     // =========================================================
@@ -123,134 +118,139 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.dataset.title || ""
             );
 
-
         if (
             !imageUrl ||
             imageUrl.startsWith("data:image/svg+xml")
         ) {
+            openTrialRoom();
+
             setStatus(
                 "This product does not have a usable garment image.",
                 "error"
             );
 
-            openTrialRoom();
             return;
         }
 
+        // Stop any previous trial
+        stopTrialRoom();
 
+        // Open Trial Room
         openTrialRoom();
 
         setStatus(
-            "Starting AI trial room...",
+            "Loading selected garment...",
             "loading"
         );
 
-
         try {
 
-            selectedGarmentBlob =
-                await imageUrlToBlob(imageUrl);
+            // Download product image
+            let rawBlob = await imageUrlToBlob(imageUrl);
 
             selectedGarmentName =
                 currentProductTitle ||
                 "Recommended garment";
 
+            selectedGarmentBlob = new File(
+                [rawBlob],
+                selectedGarmentName + ".jpg",
+                { type: rawBlob.type || "image/jpeg" }
+            );
+
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(selectedGarmentBlob);
+                garmentUpload.files = dt.files;
+            } catch (e) {
+                console.error("Could not set file input:", e);
+            }
+
+            // Show product image in preview
             showGarmentPreview(
                 selectedGarmentBlob
             );
 
-            await startTrialRoom();
+            // Enable Apply Garment button
+            applyGarmentBtn.disabled = false;
 
-            await applyGarment(
-                selectedGarmentBlob,
-                currentProductTitle,
-                currentCategory
+            // IMPORTANT:
+            // Do NOT start Decart here.
+            // Do NOT apply garment here.
+
+            setStatus(
+                "Garment loaded. Click Apply Garment to start the AI trial room.",
+                "idle"
             );
 
         } catch (error) {
 
             console.error(
-                "Try-on error:",
+                "Try-on image error:",
                 error
             );
 
+            selectedGarmentBlob = null;
+            applyGarmentBtn.disabled = true;
+
             setStatus(
                 error.message ||
-                "Could not start the trial room.",
+                "Could not load the product image.",
                 "error"
             );
         }
-    });
+    });;
 
 
     // =========================================================
     // UPLOAD YOUR OWN GARMENT
     // =========================================================
 
-    garmentUpload.addEventListener(
-        "change",
-        async (event) => {
+        garmentUpload.addEventListener(
+            "change",
+            async (event) => {
 
-            const file =
-                event.target.files?.[0];
+                const file =
+                    event.target.files?.[0];
 
-            if (!file) {
-                return;
-            }
+                if (!file) {
+                    return;
+                }
 
+                if (!file.type.startsWith("image/")) {
 
-            if (!file.type.startsWith("image/")) {
+                    setStatus(
+                        "Please select an image file.",
+                        "error"
+                    );
 
-                setStatus(
-                    "Please select an image file.",
-                    "error"
-                );
+                    return;
+                }
 
-                return;
-            }
+                selectedGarmentBlob = file;
 
+                selectedGarmentName = file.name;
 
-            selectedGarmentBlob = file;
+                currentProductTitle =
+                    file.name.replace(
+                        /\.[^/.]+$/,
+                        ""
+                    );
 
-            selectedGarmentName = file.name;
+                showGarmentPreview(file);
 
-            currentProductTitle =
-                file.name.replace(
-                    /\.[^/.]+$/,
-                    ""
-                );
+                // Open Trial Room but DON'T start Decart
+                openTrialRoom();
 
-
-            showGarmentPreview(file);
-
-            openTrialRoom();
-
-
-            try {
-
-                await startTrialRoom();
-
-                await applyGarment(
-                    selectedGarmentBlob,
-                    currentProductTitle,
-                    currentCategory
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Uploaded garment error:",
-                    error
-                );
+                // Enable Apply button
+                applyGarmentBtn.disabled = false;
 
                 setStatus(
-                    error.message ||
-                    "Could not apply the uploaded garment.",
-                    "error"
+                    "Garment selected. Click Apply Garment to start the AI trial room.",
+                    "idle"
                 );
             }
-        }
-    );
+        );
 
 
     // =========================================================
@@ -575,27 +575,39 @@ document.addEventListener("DOMContentLoaded", () => {
     // PRODUCT IMAGE → BLOB
     // =========================================================
 
-    async function imageUrlToBlob(url) {
+async function imageUrlToBlob(url) {
+    console.log("Product image URL:", url);
 
-        const proxyUrl =
-            `/api/image-proxy?url=${encodeURIComponent(url)}`;
+    const proxyUrl = url.startsWith("/api/image-proxy")
+        ? url
+        : `/api/image-proxy?url=${encodeURIComponent(url)}`;
 
+    console.log("Proxy URL:", proxyUrl);
 
-        const response =
-            await fetch(proxyUrl);
+    const response = await fetch(proxyUrl);
 
+    console.log(
+        "Image proxy response:",
+        response.status,
+        response.headers.get("content-type")
+    );
 
-        if (!response.ok) {
-
-            throw new Error(
-                "Could not load the product image."
-            );
-        }
-
-
-        return await response.blob();
+    if (!response.ok) {
+        throw new Error(`Could not load product image. HTTP ${response.status}`);
     }
 
+    const contentType = response.headers.get("content-type") || "";
+
+    if (!contentType.startsWith("image/")) {
+        throw new Error("The product URL did not return an image.");
+    }
+
+    const blob = await response.blob();
+
+    console.log("Garment image loaded:", blob.type, blob.size);
+
+    return blob;
+}
 
     // =========================================================
     // GARMENT PREVIEW
@@ -603,24 +615,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showGarmentPreview(blob) {
 
+        if (!blob) {
+            return;
+        }
+
         const objectUrl =
             URL.createObjectURL(blob);
 
+        garmentPreview.src = objectUrl;
 
-        garmentPreview.src =
-            objectUrl;
-
-
-        garmentPreview.classList.remove(
-            "hidden"
-        );
-
+        garmentPreview.classList.remove("hidden");
 
         garmentPreview.onload = () => {
-
-            URL.revokeObjectURL(
-                objectUrl
-            );
+            URL.revokeObjectURL(objectUrl);
         };
     }
 
