@@ -529,8 +529,108 @@ document.addEventListener("DOMContentLoaded", () => {
             applyGarmentBtn.disabled = false;
         }
     }
+        // =========================================================
+        // FULLSCREEN BUTTON
+        // =========================================================
+
+        const fullscreenBtn = document.createElement("button");
+
+        fullscreenBtn.type = "button";
+        fullscreenBtn.textContent = "⛶ Full Screen";
+        fullscreenBtn.className = "fullscreen-btn";
+
+        fullscreenBtn.style.cssText = `
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+            z-index: 1000;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        `;
+
+        const trialOutputContainer = trialOutput?.parentElement;
+
+        if (trialOutputContainer) {
+
+            // Make sure the button can be positioned over the video
+            trialOutputContainer.style.position = "relative";
+
+            trialOutputContainer.appendChild(fullscreenBtn);
+        }
+
+        // =========================================================
+        // FULLSCREEN FUNCTIONALITY
+        // =========================================================
+
+        if (fullscreenBtn && trialOutputContainer) {
+
+            fullscreenBtn.addEventListener("click", async () => {
+
+                try {
+
+                    if (!document.fullscreenElement) {
+
+                        await trialOutputContainer.requestFullscreen();
+
+                        fullscreenBtn.textContent = "⛶ Exit Full Screen";
+
+                    } else {
+
+                        await document.exitFullscreen();
+
+                        fullscreenBtn.textContent = "⛶ Full Screen";
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Fullscreen error:",
+                        error
+                    );
+                }
+            });
 
 
+            document.addEventListener("fullscreenchange", () => {
+
+                if (document.fullscreenElement) {
+
+                    fullscreenBtn.textContent =
+                        "⛶ Exit Full Screen";
+
+                } else {
+
+                    fullscreenBtn.textContent =
+                        "⛶ Full Screen";
+                }
+            });
+        }
+
+        const fullscreenStyle = document.createElement("style");
+
+        fullscreenStyle.textContent = `
+            .fullscreen-btn:hover {
+                background: rgba(255, 255, 255, 0.9) !important;
+                color: #111 !important;
+            }
+
+            :fullscreen {
+                background: #000;
+            }
+
+            :fullscreen video {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+        `;
+
+        document.head.appendChild(fullscreenStyle);
     // =========================================================
     // TRY-ON PROMPT
     // =========================================================
